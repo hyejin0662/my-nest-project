@@ -1,8 +1,13 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateSnsDto } from './dto/create-sns-dto';
 import { UpdateSnsDto } from './dto/update-sns-dto';
 import { RemoveSnsDto } from './dto/remove-sns-dto';
+import { Platform } from './sns.platform.enum';
 
 @Injectable()
 export class SnsService {
@@ -23,6 +28,17 @@ export class SnsService {
       throw new NotFoundException(`user with userID "${userId}" not found`);
     }
 
+    // userId와 platform의 조합이 이미 존재하는지 확인
+    const snsExists = await this.prisma.sns.findFirst({
+      where: { userId, platform },
+    });
+
+    if (snsExists) {
+      throw new ConflictException(
+        `SNS for platform "${platform}" already exists for userId "${userId}".`,
+      );
+    }
+
     return this.prisma.sns.create({
       data: {
         userId,
@@ -41,9 +57,12 @@ export class SnsService {
     });
   }
 
-  async findOne(userId: string) {
-    const sns = await this.prisma.sns.findUnique({
-      where: { userId },
+  async findOne(userId: string, platform: Platform) {
+    const sns = await this.prisma.sns.findFirst({
+      where: {
+        userId,
+        platform,
+      },
       include: {
         user: true,
       },
@@ -60,7 +79,7 @@ export class SnsService {
 
     // sns 데이터 존재 여부 확인
     const snsExists = await this.prisma.sns.findUnique({
-      where: { id },
+      where: { id, platform },
     });
 
     if (!snsExists || snsExists.userId !== userId) {
@@ -69,9 +88,21 @@ export class SnsService {
       );
     }
 
+    // 새로운 플랫폼으로 변경 시 충돌 확인
+    if (platform && platform !== snsExists.platform) {
+      const conflict = await this.prisma.sns.findFirst({
+        where: { userId, platform },
+      });
+      if (conflict) {
+        throw new ConflictException(
+          `SNS for platform "${platform}" already exists for userId "${userId}".`,
+        );
+      }
+    }
+
     // 데이터 업데이트
     return this.prisma.sns.update({
-      where: { id },
+      where: { id, platform },
       data: {
         platform: platform ?? undefined, // 값이 제공되지 않으면 필드를 무시
         accountName: accountName ?? undefined,
@@ -81,7 +112,7 @@ export class SnsService {
   }
 
   async remove(removeSnsDto: RemoveSnsDto) {
-    const { userId, password, id } = removeSnsDto;
+    const { userId, password, id, platform } = removeSnsDto;
 
     //비밀번호 검증 로직 (User 테이블에서 비밀번호 확인)
     const user = await this.prisma.user.findUnique({
@@ -93,7 +124,9 @@ export class SnsService {
     }
 
     //sns 데이터 삭제
-    const sns = await this.prisma.sns.findUnique({ where: { id } });
+    const sns = await this.prisma.sns.findFirst({
+      where: { userId, platform },
+    });
 
     if (!(!sns || sns.userId !== userId)) {
     } else {
@@ -101,7 +134,7 @@ export class SnsService {
         'SNS data not found or user does not have permission to delete it',
       );
 
-      return this.prisma.sns.delete({ where: { id } });
+      return this.prisma.sns.delete({ where: { id, platform } });
     }
   }
 }

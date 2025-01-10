@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Platform } from '../sns.platform.enum';
 
 export class UpdateSnsDto {
   @ApiProperty({ description: '수정할 SNS 데이터의 고유 ID', example: 1 })
@@ -8,11 +9,11 @@ export class UpdateSnsDto {
   userId: string;
 
   @ApiProperty({
-    description: 'SNS 플랫폼 이름',
-    example: 'Twitter',
-    required: false,
+    description: 'SNS 플랫폼',
+    enum: Platform,
+    example: Platform.FACEBOOK,
   })
-  platform?: string;
+  platform: Platform;
 
   @ApiProperty({
     description: 'SNS 계정 이름',

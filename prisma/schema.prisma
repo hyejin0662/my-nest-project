@@ -15,20 +15,28 @@ model User {
   createAt DateTime @default(now()) @db.Timestamp(6)
   nickName String   @db.VarChar(100)
   updateAt DateTime @updatedAt @db.Timestamp(6)
-  sns      Sns?
+  sns      Sns[]
 
   @@map("USER")
 }
 
 model Sns {
   id          Int      @id @default(autoincrement())
-  userId      String   @unique
-  platform    String   @db.VarChar(50)
+  userId      String
+  platform    Platform
   accountName String   @db.VarChar(100)
   url         String   @db.VarChar(255)
   createAt    DateTime @default(now()) @db.Timestamp(6)
   updateAt    DateTime @updatedAt @db.Timestamp(6)
   user        User     @relation(fields: [userId], references: [userId])
 
+  @@unique([userId, platform]) // 복합 고유 키
   @@map("SNS")
+}
+
+enum Platform {
+  FACEBOOK
+  INSTAGRAM
+  TWITTER
+  X
 }
