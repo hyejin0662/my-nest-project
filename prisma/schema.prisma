@@ -8,14 +8,14 @@ datasource db {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  userId    String   @unique
-  username  String
-  password  String   @db.VarChar(50)
-  createAt  DateTime @default(now())
-  updatedAt DateTime @updatedAt @db.Date
-  nickName  String   @map("NICK_NAME") @db.VarChar(100)
-  sns       Sns?
+  id       Int      @id @default(autoincrement())
+  userId   String   @unique
+  username String
+  password String   @db.VarChar(50)
+  createAt DateTime @default(now()) @db.Timestamp(6)
+  nickName String   @db.VarChar(100)
+  updateAt DateTime @updatedAt @db.Timestamp(6)
+  sns      Sns?
 
   @@map("USER")
 }

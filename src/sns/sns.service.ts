@@ -59,11 +59,11 @@ export class SnsService {
     const { userId, id, platform, accountName, url } = updateSnsDto;
 
     // sns 데이터 존재 여부 확인
-    const snsExists = await this.prisma.findUnique({
+    const snsExists = await this.prisma.sns.findUnique({
       where: { id },
     });
 
-    if (!snsExists || snsExists.user !== userId) {
+    if (!snsExists || snsExists.userId !== userId) {
       throw new NotFoundException(
         'sns data with Id ${ id } not found or user not authorized',
       );

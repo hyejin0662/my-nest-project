@@ -92,7 +92,6 @@ export class UsersService {
     });
   }
 
-
   async remove(removeUserDto: RemoveUserDto) {
     const { userId, password } = removeUserDto;
 
