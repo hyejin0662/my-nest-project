@@ -12,6 +12,7 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CreateSnsDto } from './dto/create-sns-dto';
 import { UpdateSnsDto } from './dto/update-sns-dto';
 import { RemoveSnsDto } from './dto/remove-sns-dto';
+import { Platform } from './sns.platform.enum';
 
 @ApiTags('SNS')
 @Controller('sns')
@@ -29,10 +30,13 @@ export class SnsController {
     return this.snsService.findAll();
   }
 
-  @Get(':userId')
+  @Get(':userId/:platform')
   @ApiOperation({ summary: '특정 sns 데이터 조회' })
-  findOne(@Param('userID') userId: string) {
-    return this.snsService.findOne(userId);
+  findOne(
+    @Param('userID') userId: string,
+    @Param('platform') platform: Platform,
+  ) {
+    return this.snsService.findOne(userId, platform);
   }
 
   @Patch()

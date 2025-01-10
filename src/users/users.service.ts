@@ -58,6 +58,7 @@ export class UsersService {
         password: includePassword,
         createAt: true,
         updateAt: true,
+        sns: true,
       },
     });
 
