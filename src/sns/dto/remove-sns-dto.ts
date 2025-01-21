@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Platform } from '../sns.platform.enum';
 export class RemoveSnsDto {
   @ApiProperty({
     description: '사용자의 고유 ID',
@@ -20,4 +21,11 @@ export class RemoveSnsDto {
     required: true,
   })
   id: number;
+
+  @ApiProperty({
+    description: '삭제할 SNS 플랫폼',
+    enum: Platform,
+    example: Platform.FACEBOOK,
+  })
+  platform: Platform;
 }

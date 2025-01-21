@@ -15,20 +15,70 @@ model User {
   createAt DateTime @default(now()) @db.Timestamp(6)
   nickName String   @db.VarChar(100)
   updateAt DateTime @updatedAt @db.Timestamp(6)
-  sns      Sns?
+  sns      Sns[]    // 1:N 관계 - 여러 SNS 계정
+  posts    Post[]   // 1:N 관계 - 여러 게시물
+  comments Comment[] // 1:N 관계 - 여러 댓글
+  likes    Like[]   // 1:N 관계 - 여러 좋아요
 
   @@map("USER")
 }
 
 model Sns {
   id          Int      @id @default(autoincrement())
-  userId      String   @unique
-  platform    String   @db.VarChar(50)
+  userId      String
+  platform    Platform
   accountName String   @db.VarChar(100)
   url         String   @db.VarChar(255)
   createAt    DateTime @default(now()) @db.Timestamp(6)
   updateAt    DateTime @updatedAt @db.Timestamp(6)
   user        User     @relation(fields: [userId], references: [userId])
 
+  @@unique([userId, platform]) // 복합 고유 키
   @@map("SNS")
+}
+
+enum Platform {
+  FACEBOOK
+  INSTAGRAM
+  TWITTER
+  X
+}
+
+
+model Post {
+  id        Int      @id @default(autoincrement())
+  userId    String
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [userId]) // 관계 설정
+
+  comments  Comment[]
+  likes     Like[]
+
+  @@map("POST")
+}
+
+model Comment {
+  id        Int      @id @default(autoincrement())
+  postId    Int
+  userId    String
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+  post      Post     @relation(fields: [postId], references: [id])
+  user      User     @relation(fields: [userId], references: [userId])
+
+  @@map("COMMENT")
+}
+
+model Like {
+  id        Int      @id @default(autoincrement())
+  postId    Int
+  userId    String
+  createdAt DateTime @default(now())
+  post      Post     @relation(fields: [postId], references: [id])
+  user      User     @relation(fields: [userId], references: [userId])
+
+  @@unique([postId, userId]) // 중복 좋아요 방지
+  @@map("LIKE")
 }
