@@ -5,6 +5,7 @@ import { UsersModule } from './users/users.module';
 import { SnsModule } from './sns/sns.module';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
+import { PostModule } from './post/post.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
     PrismaModule,
     UsersModule,
     SnsModule,
+    PostModule,
   ],
 })
 export class AppModule {}
